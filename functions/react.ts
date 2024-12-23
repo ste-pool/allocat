@@ -21,7 +21,7 @@ export const StoreReact = DefineFunction({
 
 export default SlackFunction(StoreReact, async ({ inputs, client }) => {
   // Find the "Resource borrowed" message to get the resource id
-  const getResponse = await client.apps.datastore.query({
+  const get_response = await client.apps.datastore.query({
     datastore: RESOURCE_DATASTORE,
     expression: "#channel = :channel and #message_id = :message_id",
     expression_attributes: {
@@ -34,13 +34,13 @@ export default SlackFunction(StoreReact, async ({ inputs, client }) => {
     },
   });
 
-  if (getResponse.ok) {
+  if (get_response.ok) {
     await client.apps.datastore.put({
       datastore: RESOURCE_REACT_DATASTORE,
       item: {
         id: crypto.randomUUID(),
         user_id: inputs.user_id,
-        resource_id: getResponse.items[0].id,
+        resource_id: get_response.items[0].id,
       },
     });
   } // else: just a reaction on a random message so ignore!

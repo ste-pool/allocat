@@ -2,11 +2,11 @@ import { DefineFunction, Schema, SlackFunction } from "deno-slack-sdk/mod.ts";
 import { RESOURCE_DATASTORE } from "../datastores/resource_acquisition.ts";
 import { TriggerTypes } from "deno-slack-api/mod.ts";
 import ReminderWorkflow from "../workflows/reminder_workflow.ts";
-import { borrow_resource, release_resource } from "./resource_helpers.ts";
+import { borrowResource, releaseResource } from "./resource_helpers.ts";
 
-const generate_release_buttons = async (inputs, client) => {
+const generateReleaseButtons = async (inputs, client) => {
   const user_id = inputs.interactivity.interactor.id;
-  const getResponse = await client.apps.datastore.query({
+  const get_response = await client.apps.datastore.query({
     datastore: RESOURCE_DATASTORE,
     expression:
       "#channel = :channel and #last_borrower = :user and #free <> :free",
@@ -22,28 +22,28 @@ const generate_release_buttons = async (inputs, client) => {
     },
   });
 
-  if (!getResponse.ok) {
+  if (!get_response.ok) {
     return [
       { type: "divider" },
       {
         type: "section",
         text: {
           type: "plain_text",
-          text: `Error retrieving reserved runs ${getResponse.error}`,
+          text: `Error retrieving reserved runs ${get_response.error}`,
         },
       },
     ];
   }
 
-  if (getResponse.items.length == 0) {
+  if (get_response.items.length == 0) {
     return [];
   }
 
   const blocks = [{ type: "divider" }];
 
-  getResponse.items.sort((a, b) => a.resource.localeCompare(b.resource));
+  get_response.items.sort((a, b) => a.resource.localeCompare(b.resource));
 
-  for (const item of getResponse.items) {
+  for (const item of get_response.items) {
     const release_time =
       Number.parseInt(item.last_borrow_time / 1000) + item.last_duration * 3600;
 
@@ -84,23 +84,23 @@ const generate_release_buttons = async (inputs, client) => {
   return blocks;
 };
 
-const generate_borrow_modal = async (inputs, client) => {
-  const blocks = await generate_release_buttons(inputs, client);
+const generateBorrowModal = async (inputs, client) => {
+  const blocks = await generateReleaseButtons(inputs, client);
 
-  const getResponse = await client.apps.datastore.query({
+  const get_response = await client.apps.datastore.query({
     datastore: RESOURCE_DATASTORE,
     expression: "#channel = :channel and #free = :free",
     expression_attributes: { "#channel": "channel", "#free": "free" },
     expression_values: { ":channel": inputs.channel, ":free": true },
   });
-  if (!getResponse.ok) {
-    const error = `Failed to retrieve resources: ${getResponse.error}`;
+  if (!get_response.ok) {
+    const error = `Failed to retrieve resources: ${get_response.error}`;
     return { error };
   }
 
-  getResponse.items.sort((a, b) => a.resource.localeCompare(b.resource));
+  get_response.items.sort((a, b) => a.resource.localeCompare(b.resource));
 
-  const freeItems = getResponse.items.map((x) => ({
+  const free_items = get_response.items.map((x) => ({
     text: {
       type: "plain_text",
       text: x.resource,
@@ -108,7 +108,7 @@ const generate_borrow_modal = async (inputs, client) => {
     value: x.id,
   }));
 
-  if (freeItems.length == 0) {
+  if (free_items.length == 0) {
     blocks.push({
       type: "section",
       text: {
@@ -123,7 +123,7 @@ const generate_borrow_modal = async (inputs, client) => {
       block_id: "input_resource",
       element: {
         type: "static_select",
-        options: freeItems,
+        options: free_items,
         action_id: "selected_resource",
       },
       label: {
@@ -246,7 +246,7 @@ export const AcquireModal = DefineFunction({
 });
 
 export default SlackFunction(AcquireModal, async ({ inputs, client }) => {
-  const modal = await generate_borrow_modal(inputs, client);
+  const modal = await generateBorrowModal(inputs, client);
   const response = await client.views.open(modal);
   if (response.error) {
     const error = `Failed to open a modal (error: ${response.error})`;
@@ -269,7 +269,7 @@ export default SlackFunction(AcquireModal, async ({ inputs, client }) => {
       );
       const user_id = inputs.interactivity.interactor.id;
 
-      await borrow_resource(
+      await borrowResource(
         client,
         user_id,
         duration,
@@ -284,9 +284,9 @@ export default SlackFunction(AcquireModal, async ({ inputs, client }) => {
     async ({ action, inputs, body, view, client }) => {
       const resource_id = action.action_id.slice(8);
 
-      await release_resource(client, resource_id, body.user.id);
+      await releaseResource(client, resource_id, body.user.id);
 
-      const contents = await generate_borrow_modal(inputs, client);
+      const contents = await generateBorrowModal(inputs, client);
       const response = await client.views.update({
         interactivity_pointer: body.interactivity.interactivity_pointer,
         view_id: body.view.id,

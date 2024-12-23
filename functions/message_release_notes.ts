@@ -1,7 +1,6 @@
 import { DefineFunction, Schema, SlackFunction } from "deno-slack-sdk/mod.ts";
 import { RESOURCE_DATASTORE } from "../datastores/resource_acquisition.ts";
 import { TriggerTypes } from "deno-slack-api/mod.ts";
-import { borrow_resource, release_resource } from "./resource_helpers.ts";
 import { versions } from "../versions.ts";
 
 export const MessageReleaseNotes = DefineFunction({
@@ -17,19 +16,19 @@ export default SlackFunction(
     var channel_ids = new Set();
 
     while (true) {
-      const getResponse = await client.apps.datastore.query({
+      const get_response = await client.apps.datastore.query({
         datastore: RESOURCE_DATASTORE,
         limit: 100,
         cursor: cursor,
       });
 
-      if (!getResponse.ok) {
+      if (!get_response.ok) {
         return { completed: true };
       }
-      const new_ids = new Set(getResponse.items.map((item) => item.channel));
+      const new_ids = new Set(get_response.items.map((item) => item.channel));
       channel_ids = new Set([...channel_ids, ...new_ids]);
 
-      cursor = getResponse.response_metadata?.next_cursor;
+      cursor = get_response.response_metadata?.next_cursor;
       if (!cursor) {
         break;
       }

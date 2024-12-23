@@ -1,7 +1,7 @@
 import { DefineFunction, Schema, SlackFunction } from "deno-slack-sdk/mod.ts";
 import { RESOURCE_DATASTORE } from "../datastores/resource_acquisition.ts";
 import { TriggerTypes } from "deno-slack-api/mod.ts";
-import { borrow_resource, release_resource } from "./resource_helpers.ts";
+import { borrowResource, releaseResource } from "./resource_helpers.ts";
 
 export const AcquireReminder = DefineFunction({
   callback_id: "acquire-reminder",
@@ -193,7 +193,7 @@ export default SlackFunction(AcquireReminder, async ({ inputs, client }) => {
         return { error };
       }
 
-      await borrow_resource(
+      await borrowResource(
         client,
         get_response.item.last_borrower,
         duration,
@@ -210,7 +210,7 @@ export default SlackFunction(AcquireReminder, async ({ inputs, client }) => {
   .addBlockActionsHandler(
     ["release"],
     async ({ action, inputs, body, client }) => {
-      await release_resource(client, inputs.resource_id, body.user.id);
+      await releaseResource(client, inputs.resource_id, body.user.id);
       await client.functions.completeSuccess({
         function_execution_id: body.function_data.execution_id,
         outputs: {},

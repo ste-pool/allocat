@@ -1,11 +1,11 @@
 import { DefineFunction, Schema, SlackFunction } from "deno-slack-sdk/mod.ts";
 import { RESOURCE_DATASTORE } from "../datastores/resource_acquisition.ts";
 import { TriggerTypes } from "deno-slack-api/mod.ts";
-import { release_resource } from "./resource_helpers.ts";
+import { releaseResource } from "./resource_helpers.ts";
 
-const generate_release_modal = async (inputs, client) => {
+const generateReleaseModal = async (inputs, client) => {
   const user_id = inputs.interactivity.interactor.id;
-  const getResponse = await client.apps.datastore.query({
+  const get_response = await client.apps.datastore.query({
     datastore: RESOURCE_DATASTORE,
     expression: "#channel = :channel and #free <> :free",
     expression_attributes: {
@@ -18,25 +18,25 @@ const generate_release_modal = async (inputs, client) => {
     },
   });
 
-  if (!getResponse.ok) {
+  if (!get_response.ok) {
     return [
       { type: "divider" },
       {
         type: "section",
         text: {
           type: "plain_text",
-          text: `Error retrieving reserved runs ${getResponse.error}`,
+          text: `Error retrieving reserved runs ${get_response.error}`,
         },
       },
     ];
   }
 
-  if (getResponse.items.length == 0) {
+  if (get_response.items.length == 0) {
     return [];
   }
 
   const options = [];
-  for (const item of getResponse.items) {
+  for (const item of get_response.items) {
     const release_time =
       Number.parseInt(item.last_borrow_time / 1000) + item.last_duration * 3600;
 
@@ -97,8 +97,8 @@ export const ForceRelease = DefineFunction({
 });
 
 export default SlackFunction(ForceRelease, async ({ inputs, client }) => {
-  const modal = await generate_release_modal(inputs, client);
-  console.log(modal);
+  const modal = await generateReleaseModal(inputs, client);
+
   const response = await client.views.open(modal);
   if (response.error) {
     const error = `Failed to open a modal (error: ${response.error})`;
@@ -113,7 +113,7 @@ export default SlackFunction(ForceRelease, async ({ inputs, client }) => {
   async ({ inputs, view, client }) => {
     for (const option of view.state.values.input_resource.selected_resources
       .selected_options) {
-      await release_resource(
+      await releaseResource(
         client,
         option.value,
         inputs.interactivity.interactor.id,

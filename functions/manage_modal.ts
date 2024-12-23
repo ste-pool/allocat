@@ -1,7 +1,7 @@
 import { DefineFunction, Schema, SlackFunction } from "deno-slack-sdk/mod.ts";
 import { RESOURCE_DATASTORE } from "../datastores/resource_acquisition.ts";
 
-const generate_main_modal = async (inputs, client) => {
+const generateMainModal = async (inputs, client) => {
   const main_buttons = {
     type: "actions",
     block_id: "main_menu_block",
@@ -48,8 +48,8 @@ const generate_main_modal = async (inputs, client) => {
   };
 };
 
-const generate_delete_modal = async (inputs, client) => {
-  const getResponse = await client.apps.datastore.query({
+const generateDeleteModal = async (inputs, client) => {
+  const get_response = await client.apps.datastore.query({
     datastore: RESOURCE_DATASTORE,
     expression: "#channel = :channel",
     expression_attributes: { "#channel": "channel" },
@@ -57,17 +57,17 @@ const generate_delete_modal = async (inputs, client) => {
   });
   const blocks = [];
 
-  if (!getResponse.ok) {
+  if (!get_response.ok) {
     blocks.push({
       type: "section",
       text: {
         type: "plain_text",
-        text: `Error retrieving reserved runs ${getResponse.error}`,
+        text: `Error retrieving reserved runs ${get_response.error}`,
       },
     });
   }
 
-  if (getResponse.items.length == 0) {
+  if (get_response.items.length == 0) {
     blocks.push({
       type: "section",
       text: {
@@ -77,7 +77,7 @@ const generate_delete_modal = async (inputs, client) => {
     });
   }
 
-  for (const item of getResponse.items) {
+  for (const item of get_response.items) {
     if (item.free) {
       blocks.push({
         type: "section",
@@ -119,9 +119,9 @@ const generate_delete_modal = async (inputs, client) => {
   };
 };
 
-const generate_view_modal = async (inputs, client) => {
+const generateViewModal = async (inputs, client) => {
   const user_id = inputs.interactivity.interactor.id;
-  const getResponse = await client.apps.datastore.query({
+  const get_response = await client.apps.datastore.query({
     datastore: RESOURCE_DATASTORE,
     expression: "#channel = :channel",
     expression_attributes: { "#channel": "channel" },
@@ -129,19 +129,19 @@ const generate_view_modal = async (inputs, client) => {
   });
   const blocks = [];
 
-  getResponse.items.sort((a, b) => a.resource.localeCompare(b.resource));
+  get_response.items.sort((a, b) => a.resource.localeCompare(b.resource));
 
-  if (!getResponse.ok) {
+  if (!get_response.ok) {
     blocks.push({
       type: "section",
       text: {
         type: "plain_text",
-        text: `Error retrieving reserved runs ${getResponse.error}`,
+        text: `Error retrieving reserved runs ${get_response.error}`,
       },
     });
   }
 
-  if (getResponse.items.length == 0) {
+  if (get_response.items.length == 0) {
     blocks.push({
       type: "section",
       text: {
@@ -151,7 +151,7 @@ const generate_view_modal = async (inputs, client) => {
     });
   }
 
-  for (const item of getResponse.items) {
+  for (const item of get_response.items) {
     blocks.push({
       type: "section",
       text: {
@@ -192,7 +192,7 @@ const generate_view_modal = async (inputs, client) => {
   };
 };
 
-const generate_add_modal = async (inputs, client) => {
+const generateAddModal = async (inputs, client) => {
   return {
     interactivity_pointer: inputs.interactivity.interactivity_pointer,
     view: {
@@ -234,7 +234,7 @@ export const ManageModal = DefineFunction({
 });
 
 export default SlackFunction(ManageModal, async ({ inputs, client }) => {
-  const modal = await generate_main_modal(inputs, client);
+  const modal = await generateMainModal(inputs, client);
   const response = await client.views.open(modal);
   if (response.error) {
     const error = `Failed to open a modal (error: ${response.error})`;
@@ -280,7 +280,7 @@ export default SlackFunction(ManageModal, async ({ inputs, client }) => {
         };
       }
 
-      const putResponse = await client.apps.datastore.put({
+      const put_response = await client.apps.datastore.put({
         datastore: RESOURCE_DATASTORE,
         item: {
           id: uuid,
@@ -296,11 +296,11 @@ export default SlackFunction(ManageModal, async ({ inputs, client }) => {
         },
       });
 
-      if (!putResponse.ok) {
+      if (!put_response.ok) {
         return {
           response_action: "errors",
           errors: {
-            new_resource_input: `Failed to add resource ${putResponse.error}`,
+            new_resource_input: `Failed to add resource ${put_response.error}`,
           },
         };
       }
@@ -311,7 +311,7 @@ export default SlackFunction(ManageModal, async ({ inputs, client }) => {
     },
   )
   .addBlockActionsHandler("view", async ({ inputs, body, view, client }) => {
-    const contents = await generate_view_modal(inputs, client);
+    const contents = await generateViewModal(inputs, client);
     const response = await client.views.update({
       interactivity_pointer: body.interactivity.interactivity_pointer,
       view_id: body.view.id,
@@ -319,7 +319,7 @@ export default SlackFunction(ManageModal, async ({ inputs, client }) => {
     });
   })
   .addBlockActionsHandler("add", async ({ inputs, body, view, client }) => {
-    const contents = await generate_add_modal(inputs, client);
+    const contents = await generateAddModal(inputs, client);
     const response = await client.views.update({
       interactivity_pointer: body.interactivity.interactivity_pointer,
       view_id: body.view.id,
@@ -327,7 +327,7 @@ export default SlackFunction(ManageModal, async ({ inputs, client }) => {
     });
   })
   .addBlockActionsHandler("delete", async ({ inputs, body, view, client }) => {
-    const contents = await generate_delete_modal(inputs, client);
+    const contents = await generateDeleteModal(inputs, client);
     const response = await client.views.update({
       interactivity_pointer: body.interactivity.interactivity_pointer,
       view_id: body.view.id,
@@ -361,7 +361,7 @@ export default SlackFunction(ManageModal, async ({ inputs, client }) => {
         }
       }
 
-      const contents = await generate_delete_modal(inputs, client);
+      const contents = await generateDeleteModal(inputs, client);
       const response = await client.views.update({
         interactivity_pointer: body.interactivity.interactivity_pointer,
         view_id: body.view.id,

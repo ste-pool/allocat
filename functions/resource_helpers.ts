@@ -2,7 +2,7 @@ import { RESOURCE_DATASTORE } from "../datastores/resource_acquisition.ts";
 import { RESOURCE_REACT_DATASTORE } from "../datastores/resource_react.ts";
 import { TriggerTypes } from "deno-slack-api/mod.ts";
 
-const remove_triggers = async (client, item) => {
+const removeTriggers = async (client, item) => {
   if (item.trigger_id_list) {
     for (const trigger_id of item.trigger_id_list) {
       const resp1 = await client.workflows.triggers.delete({
@@ -15,7 +15,7 @@ const remove_triggers = async (client, item) => {
   }
 };
 
-export const borrow_resource = async (
+export const borrowResource = async (
   client,
   user_id,
   duration,
@@ -105,10 +105,10 @@ export const borrow_resource = async (
   }
   // removing any old triggers has to happen at the end
   // as this could invalidate the token used in client api calls
-  await remove_triggers(client, get_response.item);
+  await removeTriggers(client, get_response.item);
 };
 
-export const release_resource = async (client, resource_id, release_person) => {
+export const releaseResource = async (client, resource_id, release_person) => {
   const get_response = await client.apps.datastore.get({
     datastore: RESOURCE_DATASTORE,
     id: resource_id,
@@ -175,5 +175,5 @@ export const release_resource = async (client, resource_id, release_person) => {
   }
   // removing any old triggers has to happen at the end
   // as this could invalidate the token used in client api calls
-  await remove_triggers(client, get_response.item);
+  await removeTriggers(client, get_response.item);
 };
