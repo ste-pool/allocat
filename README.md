@@ -1,195 +1,131 @@
-# Blank Template
+# allocat
 
-This is a blank template used to build out automations using the Slack CLI.
+NOTE: This needs an enterprise slack workspace to install.
 
-**Guide Outline**:
+Allocat is a resource manager I created for work. It's used as a simple
+way to keep track of resources inside Slack itself.
 
-- [Setup](#setup)
-  - [Install the Slack CLI](#install-the-slack-cli)
-  - [Clone the Template](#clone-the-template)
-- [Running Your Project Locally](#running-your-project-locally)
-- [Creating Triggers](#creating-triggers)
-- [Datastores](#datastores)
-- [Testing](#testing)
-- [Deploying Your App](#deploying-your-app)
-- [Viewing Activity Logs](#viewing-activity-logs)
-- [Project Structure](#project-structure)
-- [Resources](#resources)
+At the time of writing this app does not meet the criteria to appear
+on the Slack app marketplace (Mainly that it dynamically creates triggers)
+which is why I decided to post it here to see if anybody else finds it useful.
 
----
+I am not a Javascript/typescript developer. This is my first project in it.
+Don't judge it too harshly ;)
+
+This app:
+
+- Allows creation/managing of "resources" per channel - This is just a string
+  so can be anything. It is used by me to keep track of test machines that
+  people use. This string can be re-used on different channels but it is
+  classed as a different resource so both can be borrowed independently
+- Allows users to borrow a resource for a specified time.
+  As a safety feature the resource isn't automatically freed. The
+  borrowing user _has_ to say they are finished
+- Sends reminders to the user to free the resource when their time is up
+  (Or extend the time they want to borrow it for)
+- It will send a reminder every 15 minutes (Between 8am and 8pm) if the
+  user ignores the reminders.
+- Allows notifications of when resources become free.
+  If a user reacts with the emoji :eyes: to the "borrow" message
+  they will be notified when it is free.
 
 ## Setup
 
-Before getting started, first make sure you have a development workspace where
-you have permission to install apps. **Please note that the features in this
-project require that the workspace be part of
-[a Slack paid plan](https://slack.com/pricing).**
+Setup instructions:
 
-### Install the Slack CLI
+1. Make sure you have installed the Slack CLI and then linked it up to whatever
+   workspaces you want to deploy to:
 
-To use this template, you need to install and configure the Slack CLI.
-Step-by-step instructions can be found in our
-[Quickstart Guide](https://api.slack.com/automation/quickstart).
+[Quickstart Guide](https://api.slack.com/automation/quickstart) (Step 1 & 2)
 
-### Clone the Template
+2. Clone this repo and cd into the folder (`cd allocat`)
 
-Start by cloning this repository:
+3. Run `slack deploy`. If this is the first time deploying allocat it will
+   ask you to `Install into a new workspace` or similar. If you need permissions
+   to install apps into the workspace it will prompt here to request admin approval.
+   Go ask whoever maintains your slack enterprise (probably IT) to approve. Then
+   run `slack deploy` again and it should work. Once approved, you can keep deploying
+   as long as you don't change the bot scopes in the manifest.ts - If you do, that
+   will then need another admin approval.
 
-```zsh
-# Clone this project onto your machine
-$ slack create my-app -t slack-samples/deno-blank-template
+4. It will ask you to select a trigger to create. Unfortunately you can't say "All".
+   If you want an easy install, I'd select `Do not create a trigger` then run the command
+   below once it has been deployed, to install all the (current) triggers.
 
-# Change into the project directory
-$ cd my-app
+```
+slack trigger create --trigger-def triggers/acquire_modal.ts && \
+slack trigger create --trigger-def triggers/acquire_reminder.ts && \
+slack trigger create --trigger-def triggers/manage_modal.ts && \
+slack trigger create --trigger-def triggers/react.ts
 ```
 
-## Running Your Project Locally
+4. It is now deployed! Yes! To use it, head to any channel and invite @allocat to any
+   channel you wish to use it in. _Even public channels need allocat to be invited_
 
-While building your app, you can see your changes appear in your workspace in
-real-time with `slack run`. You'll know an app is the development version if the
-name has the string `(local)` appended.
+5. Slack may take a bit of time to refresh the commands/triggers that are there.
+   If you head into one of the channels you've invited allocat to, and type `/manage` you
+   should see "Manage resources [allocat]" or similar. If not, you need to manually
+   view workflows to give Slack a kick. As of the time of writing you do this by clicking on
+   the ...More button on the left side toolbar then select Automation then head to Workflows.
+   Done. Head back to the channel and you should now be able to do `/manage`
 
-```zsh
-# Run app locally
-$ slack run
+### Usage
 
-Connected, awaiting events
-```
+1. Invite allocat to a channel.
 
-To stop running locally, press `<CTRL> + C` to end the process.
+   - Send a message in the channel that says @allocat or invite from the top bar
 
-## Creating Triggers
+2. Add resources to the channel.
 
-[Triggers](https://api.slack.com/automation/triggers) are what cause workflows
-to run. These triggers can be invoked by a user, or automatically as a response
-to an event within Slack.
+   - `/manage` and click on Manage resources. then click `Add Resource`
 
-When you `run` or `deploy` your project for the first time, the CLI will prompt
-you to create a trigger if one is found in the `triggers/` directory. For any
-subsequent triggers added to the application, each must be
-[manually added using the `trigger create` command](#manual-trigger-creation).
+3. Anyone that wants to borrow the resource can then run `/acquire` to acquire the
+   resources for a time.
 
-When creating triggers, you must select the workspace and environment that you'd
-like to create the trigger in. Each workspace can have a local development
-version (denoted by `(local)`), as well as a deployed version. _Triggers created
-in a local environment will only be available to use when running the
-application locally._
+   - Alternatively, you can use the Workflows tab on top of the channel.
+   - Alternate alternatively you can use a featured workflow (See customisations).
 
-### Link Triggers
+4. To release a resource, either wait for the reminder message or run `/acquire`
+   again and you can see the devices you've currently borrowed in that channel.
 
-A [link trigger](https://api.slack.com/automation/triggers/link) is a type of
-trigger that generates a **Shortcut URL** which, when posted in a channel or
-added as a bookmark, becomes a link. When clicked, the link trigger will run the
-associated workflow.
+5. If someone has a resource you have, react with :eyes: on the message that says
+   "X has borrowed the resource" and allocat will send you a notification when it's free.
 
-Link triggers are _unique to each installed version of your app_. This means
-that Shortcut URLs will be different across each workspace, as well as between
-[locally run](#running-your-project-locally) and
-[deployed apps](#deploying-your-app).
+## Customisations
 
-With link triggers, after selecting a workspace and environment, the output
-provided will include a Shortcut URL. Copy and paste this URL into a channel as
-a message, or add it as a bookmark in a channel of the workspace you selected.
-Interacting with this link will run the associated workflow.
+There are a few tweaks you can do to change the behaviour:
 
-**Note: triggers won't run the workflow unless the app is either running locally
-or deployed!**
+1. There is a prompt when using the workflows saying "Do you want to allow this workflow" or similar.
+   That is because of the emoji:read manifest and the react workflow to watch for the :eyes emoji.
+   If you don't need that feature, you can tweak the manifest to remove the two lines commented and
+   remove the react trigger (`slack trigger remove` and select the reaction workflow) and then
+   redeploy (`slack deploy`)
 
-### Manual Trigger Creation
+2. If the channel that allocat is on is only really to manage resources you can tell slack
+   to remove the normal text message box, and just replace it with a button for Acquire resources.
+   To do that, head to the channel and click on Workflows and add Acquire resource as a "feature workflow".
 
-To manually create a trigger, use the following command:
+3. If you would like updates, or to change allocat yourself, I'd recommend enabling
+   and using the manage workflow.
 
-```zsh
-$ slack trigger create --trigger-def triggers/<YOUR_TRIGGER_FILE>.ts
-```
+   Firstly create the release trigger:
 
-## Datastores
+   ```
+   slack trigger create --trigger-def triggers/message_release_notes.ts
+   ```
 
-For storing data related to your app, datastores offer secure storage on Slack
-infrastructure. The use of a datastore requires the
-`datastore:write`/`datastore:read` scopes to be present in your manifest.
+   Then make a note of the trigger ID, and to make it only work for app collaborators
+   (This means that only you can run this - You can read more [here](https://api.slack.com/automation/triggers/manage#manage))
 
-## Testing
+   ```
+   slack trigger access --trigger-id <The ID from the previous command. Should begin with Ft.> --grant --app-collaborators
+   ```
 
-Test filenames should be suffixed with `_test`.
+   Then if you ever make some updates, add a new entry to versions.ts, and then you can run
+   the workflow `/message` and find 'Message release note'. This will send the latest versions.ts entry
+   to every channel that have some devices registered with allocat (To stop it posting in a channel,
+   just make sure that all resources have been removed with /manage devices in that channel)
 
-Run all tests with `deno test`:
+## Attribution
 
-```zsh
-$ deno test
-```
-
-## Deploying Your App
-
-Once development is complete, deploy the app to Slack infrastructure using
-`slack deploy`:
-
-```zsh
-$ slack deploy
-```
-
-When deploying for the first time, you'll be prompted to
-[create a new link trigger](#creating-triggers) for the deployed version of your
-app. When that trigger is invoked, the workflow should run just as it did when
-developing locally (but without requiring your server to be running).
-
-## Viewing Activity Logs
-
-Activity logs of your application can be viewed live and as they occur with the
-following command:
-
-```zsh
-$ slack activity --tail
-```
-
-## Project Structure
-
-### `.slack/`
-
-Contains `apps.dev.json` and `apps.json`, which include installation details for
-development and deployed apps.
-
-### `datastores/`
-
-[Datastores](https://api.slack.com/automation/datastores) securely store data
-for your application on Slack infrastructure. Required scopes to use datastores
-include `datastore:write` and `datastore:read`.
-
-### `functions/`
-
-[Functions](https://api.slack.com/automation/functions) are reusable building
-blocks of automation that accept inputs, perform calculations, and provide
-outputs. Functions can be used independently or as steps in workflows.
-
-### `triggers/`
-
-[Triggers](https://api.slack.com/automation/triggers) determine when workflows
-are run. A trigger file describes the scenario in which a workflow should be
-run, such as a user pressing a button or when a specific event occurs.
-
-### `workflows/`
-
-A [workflow](https://api.slack.com/automation/workflows) is a set of steps
-(functions) that are executed in order.
-
-Workflows can be configured to run without user input or they can collect input
-by beginning with a [form](https://api.slack.com/automation/forms) before
-continuing to the next step.
-
-### `manifest.ts`
-
-The [app manifest](https://api.slack.com/automation/manifest) contains the app's
-configuration. This file defines attributes like app name and description.
-
-### `slack.json`
-
-Used by the CLI to interact with the project's SDK dependencies. It contains
-script hooks that are executed by the CLI and implemented by the SDK.
-
-## Resources
-
-To learn more about developing automations on Slack, visit the following:
-
-- [Automation Overview](https://api.slack.com/automation)
-- [CLI Quick Reference](https://api.slack.com/automation/cli/quick-reference)
-- [Samples and Templates](https://api.slack.com/automation/samples)
+This project uses third-party resources. See [ATTRIBUTION.md](./ATTRIBUTION.md) for details.
