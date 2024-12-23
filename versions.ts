@@ -1,6 +1,6 @@
 export const versions = [
   `Version 2.4 changes:
-- Added a force release resource option for specific users (Ask @steven.pool if you want to be granted access)
+- Added a force release resource option for specific users
 `,
   `Version 2.3 changes:
 - Delayed the removal of old triggers to fix a slack update\n(Messages posted from the reminder message should now work again)
