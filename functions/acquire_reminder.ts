@@ -40,13 +40,11 @@ export default SlackFunction(AcquireReminder, async ({ inputs, client }) => {
 
   // get users timezone info to stop reminders outside nice times
   var tz_offset = 0;
-  var tz_name = "UTC";
   const user_info = await client.users.info({
     user: get_response.item.last_borrower,
   });
   if (user_info.ok) {
     tz_offset = user_info.user.tz_offset;
-    tz_name = user_info.user.tz;
   } else {
     console.error("Error finding user timezone. Defaulting to UTC.");
     console.error(user_info);
@@ -66,6 +64,9 @@ export default SlackFunction(AcquireReminder, async ({ inputs, client }) => {
     reminder_time.setSeconds(0);
   }
 
+  // Now transition back to UTC time
+  const corrected_time = new Date(reminder_time.getTime() - tz_offset * 1000);
+
   const release_trigger = await client.workflows.triggers.create({
     type: TriggerTypes.Scheduled,
     name: "Resource reminder message",
@@ -74,8 +75,7 @@ export default SlackFunction(AcquireReminder, async ({ inputs, client }) => {
       resource_id: { value: inputs.resource_id },
     },
     schedule: {
-      start_time: reminder_time.toISOString(),
-      timezone: tz_name,
+      start_time: corrected_time.toISOString(),
       frequency: {
         type: "once",
       },
