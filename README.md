@@ -37,12 +37,17 @@ Main flow:
 <img src="demo_screenshots/channel_posts.png" height="100px"/>
 <img src="demo_screenshots/reminder.png" height="50px"/>
 
-Managing of devices:
+Managing of resources:
 
 <img src="demo_screenshots/manage_main.png" height="100px"/>
 <img src="demo_screenshots/view_main.png" height="100px"/>
 <img src="demo_screenshots/add_error.png" height="100px"/>
 <img src="demo_screenshots/delete_main.png" height="100px"/>
+
+Watching of resources:
+
+<img src="demo_screenshots/eyes_react.png", height=50px"/>
+<img src="demo_screenshots/eyes_response.png", height=50px"/>
 
 ## Setup
 
