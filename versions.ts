@@ -1,4 +1,8 @@
 export const versions = [
+  ` Version 2.6 changes:
+- Fixed the acquire modal to report time in users timezone
+- Removed old device reference
+`,
   `Version 2.5 changes:
 - 8am-8pm reminder checks now happen in the users local timezone
 - If more than 1000 devices in total, allocat now still functions

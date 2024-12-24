@@ -47,13 +47,29 @@ const generateReleaseButtons = async (inputs, client) => {
 
   get_response.items.sort((a, b) => a.resource.localeCompare(b.resource));
 
+  // get users timezone info to show "borrowed until" in their timezone
+  var tz_offset = 0;
+  const user_info = await client.users.info({
+    user: user_id,
+  });
+  if (user_info.ok) {
+    tz_offset = user_info.user.tz_offset;
+  } else {
+    console.error("Error finding user timezone. Defaulting to UTC.");
+    console.error(user_info);
+  }
+
   for (const item of get_response.items) {
     const release_time =
-      Number.parseInt(item.last_borrow_time / 1000) + item.last_duration * 3600;
+      Number.parseInt(item.last_borrow_time / 1000) +
+      item.last_duration * 3600 +
+      tz_offset;
 
     // The release_time_str is a backup if slack can't parse the !date for whatever reason
     const release_time_str = new Date(
-      item.last_borrow_time + item.last_duration * 3600 * 1000,
+      item.last_borrow_time +
+        item.last_duration * 3600 * 1000 +
+        tz_offset * 1000,
     ).toISOString();
     blocks.push({
       type: "section",
@@ -132,7 +148,7 @@ const generateBorrowModal = async (inputs, client) => {
       },
       label: {
         type: "plain_text",
-        text: "Hostname",
+        text: "Resource",
       },
     });
 
