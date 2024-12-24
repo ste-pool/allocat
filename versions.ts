@@ -1,4 +1,7 @@
 export const versions = [
+  ` Version 2.7 changes:
+- Fix negative UTC offset timezones
+`,
   ` Version 2.6 changes:
 - Fixed the acquire modal to report time in users timezone
 - Removed old device reference
