@@ -100,14 +100,14 @@ There are a few tweaks you can do to change the behaviour:
    remove the react trigger (`slack trigger remove` and select the reaction trigger) and then
    redeploy (`slack deploy`)
 
-   <img src="demo_screenshots/review_workflow_access.png" height="250px"/>
+   <img src="demo_screenshots/review_workflow_access.png" height="150px"/>
 
 2. If the channel that allocat is on is only really to manage resources, you can tell slack
    to remove the normal text message box and just replace it with a button for Acquire resources.
    To do that, head to the channel and click on Workflows and add Acquire resource as a "feature workflow".
 
    <img src="demo_screenshots/featured_workflow.png" height="100px"/>
-   <img src="demo_screenshots/featured_workflow_message.png" height="150px"/>
+   <img src="demo_screenshots/featured_workflow_message.png" height="50px"/>
 
 3. If you would like updates, or to change allocat yourself, I'd recommend enabling
    and using the manage workflow.
@@ -145,7 +145,7 @@ There are a few tweaks you can do to change the behaviour:
 
    Then the app collaborators can run `/force release` in a channel to free up a resource
 
-   <img src="demo_screenshots/force_release.png" height="50px"/>
+   <img src="demo_screenshots/force_release.png" height="150px"/>
 
 ## Demo screenshots
 
@@ -156,6 +156,7 @@ Main flow:
 <img src="demo_screenshots/reminder.png" height="50px"/>
 
 Managing of devices:
+
 <img src="demo_screenshots/manage_main.png" height="100px"/>
 <img src="demo_screenshots/view_main.png" height="100px"/>
 <img src="demo_screenshots/add_error.png" height="100px"/>
