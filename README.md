@@ -29,6 +29,21 @@ This app:
   If a user reacts with the emoji :eyes: to the "borrow" message
   they will be notified when it is free.
 
+## Demo screenshots
+
+Main flow:
+
+<img src="demo_screenshots/acquire_main.png" height="250px"/>
+<img src="demo_screenshots/channel_posts.png" height="100px"/>
+<img src="demo_screenshots/reminder.png" height="50px"/>
+
+Managing of devices:
+
+<img src="demo_screenshots/manage_main.png" height="100px"/>
+<img src="demo_screenshots/view_main.png" height="100px"/>
+<img src="demo_screenshots/add_error.png" height="100px"/>
+<img src="demo_screenshots/delete_main.png" height="100px"/>
+
 ## Setup
 
 Setup instructions:
@@ -146,21 +161,6 @@ There are a few tweaks you can do to change the behaviour:
    Then the app collaborators can run `/force release` in a channel to free up a resource
 
    <img src="demo_screenshots/force_release.png" height="150px"/>
-
-## Demo screenshots
-
-Main flow:
-
-<img src="demo_screenshots/acquire_main.png" height="250px"/>
-<img src="demo_screenshots/channel_posts.png" height="100px"/>
-<img src="demo_screenshots/reminder.png" height="50px"/>
-
-Managing of devices:
-
-<img src="demo_screenshots/manage_main.png" height="100px"/>
-<img src="demo_screenshots/view_main.png" height="100px"/>
-<img src="demo_screenshots/add_error.png" height="100px"/>
-<img src="demo_screenshots/delete_main.png" height="100px"/>
 
 ## Attribution
 
