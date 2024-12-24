@@ -46,8 +46,8 @@ Managing of resources:
 
 Watching of resources:
 
-<img src="demo_screenshots/eyes_react.png", height=50px"/>
-<img src="demo_screenshots/eyes_response.png", height=50px"/>
+<img src="demo_screenshots/eyes_react.png" height=50px"/>
+<img src="demo_screenshots/eyes_response.png" height=50px"/>
 
 ## Setup
 
