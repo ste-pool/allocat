@@ -100,14 +100,14 @@ There are a few tweaks you can do to change the behaviour:
    remove the react trigger (`slack trigger remove` and select the reaction trigger) and then
    redeploy (`slack deploy`)
 
-   ![Emoji permissions](demo_screenshots/review_workflow_access.png){height=250px}
+   ![Emoji permissions](demo_screenshots/review_workflow_access.png){:height="250px"}
 
 2. If the channel that allocat is on is only really to manage resources, you can tell slack
    to remove the normal text message box and just replace it with a button for Acquire resources.
    To do that, head to the channel and click on Workflows and add Acquire resource as a "feature workflow".
 
-   ![Feature workflow](demo_screenshots/featured_workflow.png){height=100px}
-   ![Feature workflow message](demo_screenshots/featured_workflow_message.png){height=150px}
+   ![Feature workflow](demo_screenshots/featured_workflow.png){:height="100px"}
+   ![Feature workflow message](demo_screenshots/featured_workflow_message.png){:height="150px"}
 
 3. If you would like updates, or to change allocat yourself, I'd recommend enabling
    and using the manage workflow.
@@ -130,7 +130,7 @@ There are a few tweaks you can do to change the behaviour:
    to every channel that have some devices registered with allocat (To stop it posting in a channel,
    just make sure that all resources have been removed with /manage devices in that channel)
 
-   ![Release notes](demo_screenshots/message_release_notes.png){height=100px}
+   ![Release notes](demo_screenshots/message_release_notes.png){:height="100px"}
 
 4. Sometimes, someone goes on holiday and forgets to release a resource. The policy of allocat
    is generally to let someone release the resource in case they have ongoing work. However,
@@ -145,21 +145,21 @@ There are a few tweaks you can do to change the behaviour:
 
    Then the app collaborators can run `/force release` in a channel to free up a resource
 
-   ![Force release](demo_screenshots/force_release.png){height=50px}
+   ![Force release](demo_screenshots/force_release.png){:height="50px"}
 
 ## Demo screenshots
 
 Main flow:
 
-![Acquire modal](demo_screenshots/acquire_main.png){height=250px}
-![Channel posts](demo_screenshots/channel_posts.png){height=100px}
-![Reminder message](demo_screenshots/reminder.png){height=50px}
+![Acquire modal](demo_screenshots/acquire_main.png){:height="250px"}
+![Channel posts](demo_screenshots/channel_posts.png){:height="100px"}
+![Reminder message](demo_screenshots/reminder.png){:height="50px"}
 
 Managing of devices:
-![Manage modal](demo_screenshots/manage_main.png){height=100px}
-![View modal](demo_screenshots/view_main.png){height=100px}
-![Add modal](demo_screenshots/add_error.png){height=100px}
-![Delete modal](demo_screenshots/delete_main.png){height=100px}
+![Manage modal](demo_screenshots/manage_main.png){:height="100px"}
+![View modal](demo_screenshots/view_main.png){:height="100px"}
+![Add modal](demo_screenshots/add_error.png){:height="100px"}
+![Delete modal](demo_screenshots/delete_main.png){:height="100px"}
 
 ## Attribution
 
