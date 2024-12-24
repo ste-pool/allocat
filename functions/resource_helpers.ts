@@ -2,6 +2,35 @@ import { RESOURCE_DATASTORE } from "../datastores/resource_acquisition.ts";
 import { RESOURCE_REACT_DATASTORE } from "../datastores/resource_react.ts";
 import { TriggerTypes } from "deno-slack-api/mod.ts";
 
+export const queryDatastore = async (client, query) => {
+  /* The datastore doesn't allow a "full" query
+    It only queries up to a 'limit' number of records and return
+    the next cursor. This function wraps the query to query the
+    entire datastore
+    */
+
+  query.cusror = undefined;
+  query.limit = 1000;
+
+  var get_response = undefined;
+  var items = [];
+
+  while (true) {
+    get_response = await client.apps.datastore.query(query);
+    if (!get_response.ok) {
+      console.error(get_response);
+      return get_response;
+    }
+    items.push(...get_response.items);
+    query.cursor = get_response.cursor;
+    if (!query.cursor) {
+      break;
+    }
+  }
+  get_response.items = items;
+  return get_response;
+};
+
 const removeTriggers = async (client, item) => {
   if (item.trigger_id_list) {
     for (const trigger_id of item.trigger_id_list) {
@@ -152,7 +181,7 @@ export const releaseResource = async (client, resource_id, release_person) => {
     }
 
     // And notify any watchers
-    const reactResponse = await client.apps.datastore.query({
+    const reactResponse = await queryDatastore(client, {
       datastore: RESOURCE_REACT_DATASTORE,
       expression: "#resource_id = :resource_id",
       expression_attributes: { "#resource_id": "resource_id" },

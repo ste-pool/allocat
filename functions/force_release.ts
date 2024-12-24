@@ -1,11 +1,11 @@
 import { DefineFunction, Schema, SlackFunction } from "deno-slack-sdk/mod.ts";
 import { RESOURCE_DATASTORE } from "../datastores/resource_acquisition.ts";
 import { TriggerTypes } from "deno-slack-api/mod.ts";
-import { releaseResource } from "./resource_helpers.ts";
+import { releaseResource, queryDatastore } from "./resource_helpers.ts";
 
 const generateReleaseModal = async (inputs, client) => {
   const user_id = inputs.interactivity.interactor.id;
-  const get_response = await client.apps.datastore.query({
+  const get_response = await queryDatastore(client, {
     datastore: RESOURCE_DATASTORE,
     expression: "#channel = :channel and #free <> :free",
     expression_attributes: {

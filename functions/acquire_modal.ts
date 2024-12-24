@@ -2,11 +2,15 @@ import { DefineFunction, Schema, SlackFunction } from "deno-slack-sdk/mod.ts";
 import { RESOURCE_DATASTORE } from "../datastores/resource_acquisition.ts";
 import { TriggerTypes } from "deno-slack-api/mod.ts";
 import ReminderWorkflow from "../workflows/reminder_workflow.ts";
-import { borrowResource, releaseResource } from "./resource_helpers.ts";
+import {
+  borrowResource,
+  releaseResource,
+  queryDatastore,
+} from "./resource_helpers.ts";
 
 const generateReleaseButtons = async (inputs, client) => {
   const user_id = inputs.interactivity.interactor.id;
-  const get_response = await client.apps.datastore.query({
+  const get_response = await queryDatastore(client, {
     datastore: RESOURCE_DATASTORE,
     expression:
       "#channel = :channel and #last_borrower = :user and #free <> :free",
@@ -87,7 +91,7 @@ const generateReleaseButtons = async (inputs, client) => {
 const generateBorrowModal = async (inputs, client) => {
   const blocks = await generateReleaseButtons(inputs, client);
 
-  const get_response = await client.apps.datastore.query({
+  const get_response = await queryDatastore(client, {
     datastore: RESOURCE_DATASTORE,
     expression: "#channel = :channel and #free = :free",
     expression_attributes: { "#channel": "channel", "#free": "free" },

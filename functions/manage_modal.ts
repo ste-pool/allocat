@@ -1,5 +1,6 @@
 import { DefineFunction, Schema, SlackFunction } from "deno-slack-sdk/mod.ts";
 import { RESOURCE_DATASTORE } from "../datastores/resource_acquisition.ts";
+import { queryDatastore } from "./resource_helpers.ts";
 
 const generateMainModal = async (inputs, client) => {
   const main_buttons = {
@@ -49,7 +50,7 @@ const generateMainModal = async (inputs, client) => {
 };
 
 const generateDeleteModal = async (inputs, client) => {
-  const get_response = await client.apps.datastore.query({
+  const get_response = await queryDatastore(client, {
     datastore: RESOURCE_DATASTORE,
     expression: "#channel = :channel",
     expression_attributes: { "#channel": "channel" },
@@ -121,7 +122,7 @@ const generateDeleteModal = async (inputs, client) => {
 
 const generateViewModal = async (inputs, client) => {
   const user_id = inputs.interactivity.interactor.id;
-  const get_response = await client.apps.datastore.query({
+  const get_response = await queryDatastore(client, {
     datastore: RESOURCE_DATASTORE,
     expression: "#channel = :channel",
     expression_attributes: { "#channel": "channel" },
@@ -253,7 +254,7 @@ export default SlackFunction(ManageModal, async ({ inputs, client }) => {
       const resource =
         view.state.values["new_resource_input"]["new_resource_name"].value;
 
-      const get_response = await client.apps.datastore.query({
+      const get_response = await queryDatastore(client, {
         datastore: RESOURCE_DATASTORE,
         expression: "#channel = :channel and #resource = :resource",
         expression_attributes: {

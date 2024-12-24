@@ -1,6 +1,7 @@
 import { DefineFunction, Schema, SlackFunction } from "deno-slack-sdk/mod.ts";
 import { RESOURCE_DATASTORE } from "../datastores/resource_acquisition.ts";
 import { RESOURCE_REACT_DATASTORE } from "../datastores/resource_react.ts";
+import { queryDatastore } from "./resource_helpers.ts";
 
 export const StoreReact = DefineFunction({
   callback_id: "store_react",
@@ -21,7 +22,7 @@ export const StoreReact = DefineFunction({
 
 export default SlackFunction(StoreReact, async ({ inputs, client }) => {
   // Find the "Resource borrowed" message to get the resource id
-  const get_response = await client.apps.datastore.query({
+  const get_response = await queryDatastore(client, {
     datastore: RESOURCE_DATASTORE,
     expression: "#channel = :channel and #message_id = :message_id",
     expression_attributes: {

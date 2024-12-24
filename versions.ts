@@ -1,4 +1,9 @@
 export const versions = [
+  `Version 2.5 changes:
+- 8am-8pm reminder checks now happen in the users local timezone
+- If more than 1000 devices in total, allocat now still functions
+- Updated README with demo pictures
+`,
   `Version 2.4 changes:
 - Added a force release resource option for specific users
 `,
